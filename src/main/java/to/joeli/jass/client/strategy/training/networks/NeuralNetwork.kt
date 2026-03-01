@@ -2,7 +2,9 @@ package to.joeli.jass.client.strategy.training.networks
 
 import org.slf4j.LoggerFactory
 import org.tensorflow.SavedModelBundle
-import org.tensorflow.Tensor
+import org.tensorflow.ndarray.NdArrays
+import org.tensorflow.ndarray.Shape
+import org.tensorflow.types.TFloat32
 import to.joeli.jass.client.strategy.helpers.ShellScriptRunner
 import to.joeli.jass.client.strategy.training.NetworkType
 import to.joeli.jass.client.strategy.training.data.DataSet
@@ -30,17 +32,24 @@ open class NeuralNetwork(private val networkType: NetworkType, var isTrainable: 
     }
 
     @Synchronized
-    fun predict(features: Array<FloatArray>): Any {
+    fun predict(features: Array<FloatArray>): TFloat32 {
         if (savedModelBundle == null)
             throw IllegalStateException("There is no neural network loaded! Cannot make any predictions!")
 
-        val input = Array(1) { Array(features.size) { FloatArray(features[0].size) } }
-        input[0] = features
+        val rows = features.size
+        val cols = features[0].size
+        val inputTensor = TFloat32.tensorOf(Shape.of(1, rows.toLong(), cols.toLong()))
+        for (r in 0 until rows) {
+            for (c in 0 until cols) {
+                inputTensor.setFloat(features[r][c], 0, r.toLong(), c.toLong())
+            }
+        }
 
-        return savedModelBundle!!.session().runner()
-                .feed("input", Tensor.create(input))
+        val result = savedModelBundle!!.session().runner()
+                .feed("input", inputTensor)
                 .fetch(networkType.output)
-                .run()[0]
+                .run()
+        return result[0] as TFloat32
     }
 
     companion object {

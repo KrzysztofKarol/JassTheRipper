@@ -1,14 +1,13 @@
 package to.joeli.jass.game.mode;
 
-import com.pholser.junit.quickcheck.ForAll;
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import to.joeli.jass.client.game.Game;
 import to.joeli.jass.client.game.Move;
 import to.joeli.jass.client.game.Player;
 import to.joeli.jass.game.cards.Card;
 import to.joeli.jass.game.cards.Color;
 import org.junit.Test;
-import org.junit.contrib.theories.Theories;
-import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
 import java.util.EnumSet;
@@ -25,7 +24,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeThat;
 
-@RunWith(Theories.class)
+@RunWith(JUnitQuickcheck.class)
 public class TopDownModeTest {
 
     @Test
@@ -86,9 +85,9 @@ public class TopDownModeTest {
         assertThat(score, equalTo(26));
     }
 
-    @Theory
+    @Property
     public void canPlayCard_whenNoCardIsPlayed_everyCardIsAllowed(
-            @ForAll Card cardToPlay) {
+            Card cardToPlay) {
 
         final Set<Card> alreadyPlayedCards = EnumSet.noneOf(Card.class);
         final Set<Card> playerCards = EnumSet.of(cardToPlay);
@@ -98,10 +97,10 @@ public class TopDownModeTest {
         assertTrue(canCardBePlayed);
     }
 
-    @Theory
+    @Property
     public void canPlayCard_withPlayedCards_allowsCardsOfSameColor(
-            @ForAll(sampleSize = 20) Card playedCard,
-            @ForAll(sampleSize = 20) Card cardToPlay) {
+            Card playedCard,
+            Card cardToPlay) {
 
         assumeThat(playedCard.getColor(), equalTo(cardToPlay.getColor()));
 
@@ -114,10 +113,10 @@ public class TopDownModeTest {
         assertTrue(canCardBePlayed);
     }
 
-    @Theory
+    @Property
     public void canPlayCard_withPlayedCards_allowsNoCardsOfOtherColor(
-            @ForAll(sampleSize = 20) Card playedCard,
-            @ForAll(sampleSize = 20) Card cardToPlay) {
+            Card playedCard,
+            Card cardToPlay) {
 
         assumeThat(playedCard, not(equalTo(HEART_JACK)));
         assumeThat(playedCard.getColor(), equalTo(HEARTS));

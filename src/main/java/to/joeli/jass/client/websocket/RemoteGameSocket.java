@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import to.joeli.jass.messages.Message;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@WebSocket
+@WebSocket(autoDemand = true)
 public class RemoteGameSocket extends GameSocket {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
@@ -26,7 +26,7 @@ public class RemoteGameSocket extends GameSocket {
         return this.closeLatch.await(duration, unit);
     }
 
-    @OnWebSocketConnect
+    @OnWebSocketOpen
     public void onWebSocketConnect(Session session) {
         logger.trace("Got connect: {}", session);
         super.onConnect(new WebSocketResponseChannel(session));

@@ -3,7 +3,7 @@ package to.joeli.jass.client.rest.resources;
 import to.joeli.jass.client.rest.Server;
 import to.joeli.jass.client.strategy.JassTheRipperJassStrategy;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 /**
  * Root resource (exposed at "runs-100000" path)

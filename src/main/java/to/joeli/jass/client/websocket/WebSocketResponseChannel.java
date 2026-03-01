@@ -3,11 +3,10 @@ package to.joeli.jass.client.websocket;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import to.joeli.jass.messages.responses.Response;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class WebSocketResponseChannel implements ResponseChannel {
 
@@ -23,11 +22,7 @@ public class WebSocketResponseChannel implements ResponseChannel {
     public void respond(Response response) {
         final String messageString = toJson(response);
         logger.trace("Sending message: {}", messageString);
-        try {
-            session.getRemote().sendString(messageString);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        session.sendText(messageString, Callback.NOOP);
     }
 
     private static String toJson(Object obj) {

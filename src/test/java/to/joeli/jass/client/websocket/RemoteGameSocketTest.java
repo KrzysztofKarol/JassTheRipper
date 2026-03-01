@@ -7,10 +7,13 @@ import to.joeli.jass.messages.responses.ChooseSession;
 import to.joeli.jass.messages.responses.ChooseTrumpf;
 import to.joeli.jass.messages.type.*;
 import to.joeli.jass.game.Trumpf;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.junit.Test;
 
 import java.io.IOException;
+
+import static org.mockito.ArgumentMatchers.any;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,7 +36,7 @@ public class RemoteGameSocketTest {
 
         remoteGameSocket.onWebSocketMessage("{\"type\":\"REQUEST_PLAYER_NAME\"}");
 
-        verify(session.getRemote()).sendString("{\"type\":\"CHOOSE_PLAYER_NAME\",\"data\":\"name\"}");
+        verify(session).sendText(eq("{\"type\":\"CHOOSE_PLAYER_NAME\",\"data\":\"name\"}"), any(Callback.class));
         verify(handler).onRequestPlayerName();
         verifyNoMoreInteractions(handler);
     }
@@ -66,9 +69,9 @@ public class RemoteGameSocketTest {
 
         remoteGameSocket.onWebSocketMessage("{\"type\":\"REQUEST_SESSION_CHOICE\"}");
 
-        verify(session.getRemote()).sendString("{\"type\":\"CHOOSE_SESSION\"," +
+        verify(session).sendText(eq("{\"type\":\"CHOOSE_SESSION\"," +
                 "\"data\":{\"sessionChoice\":\"AUTOJOIN\",\"sessionName\":\"Java Client Session\"," +
-                "\"sessionType\":\"TOURNAMENT\",\"asSpectator\":false,\"advisedPlayerName\":null,\"chosenTeamIndex\":1}}");
+                "\"sessionType\":\"TOURNAMENT\",\"asSpectator\":false,\"advisedPlayerName\":null,\"chosenTeamIndex\":1}}"), any(Callback.class));
         verify(handler).onRequestSessionChoice();
         verifyNoMoreInteractions(handler);
     }
@@ -84,7 +87,7 @@ public class RemoteGameSocketTest {
 
         remoteGameSocket.onWebSocketMessage("{\"type\":\"REQUEST_TRUMPF\"}");
 
-        verify(session.getRemote()).sendString("{\"type\":\"CHOOSE_TRUMPF\",\"data\":{\"mode\":\"OBEABE\",\"trumpfColor\":null}}");
+        verify(session).sendText(eq("{\"type\":\"CHOOSE_TRUMPF\",\"data\":{\"mode\":\"OBEABE\",\"trumpfColor\":null}}"), any(Callback.class));
         verify(handler).onRequestTrumpf();
         verifyNoMoreInteractions(handler);
     }
@@ -115,7 +118,7 @@ public class RemoteGameSocketTest {
 
         remoteGameSocket.onWebSocketMessage("{\"type\":\"REQUEST_CARD\"}");
 
-        verify(session.getRemote()).sendString("{\"type\":\"CHOOSE_CARD\",\"data\":{\"number\":14,\"color\":\"DIAMONDS\"}}");
+        verify(session).sendText(eq("{\"type\":\"CHOOSE_CARD\",\"data\":{\"number\":14,\"color\":\"DIAMONDS\"}}"), any(Callback.class));
         verify(handler).onRequestCard();
         verifyNoMoreInteractions(handler);
     }

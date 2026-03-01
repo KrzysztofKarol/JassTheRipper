@@ -1,7 +1,6 @@
 package to.joeli.jass.client.strategy.helpers;
 
 import org.junit.Test;
-import org.mockito.internal.util.reflection.Whitebox;
 import to.joeli.jass.client.game.Game;
 import to.joeli.jass.client.game.GameSession;
 import to.joeli.jass.client.game.Move;
@@ -11,6 +10,7 @@ import to.joeli.jass.game.cards.Card;
 import to.joeli.jass.game.cards.Color;
 import to.joeli.jass.game.mode.Mode;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -149,9 +149,11 @@ public class NeuralNetworkHelperTest {
 	}
 
 	@Test
-	public void testScoreFeaturesHasShiftedBit() {
+	public void testScoreFeaturesHasShiftedBit() throws Exception {
 		final Game game = GameSessionBuilder.startedClubsGame();
-		Whitebox.setInternalState(game, "shifted", true);
+		Field f = game.getClass().getDeclaredField("shifted");
+		f.setAccessible(true);
+		f.set(game, true);
 		final float[][] scoreFeatures = NeuralNetworkHelper.getScoreFeatures(game);
 		assertEquals(0, scoreFeatures[0][0], DELTA);
 		assertEquals(1, scoreFeatures[0][1], DELTA);

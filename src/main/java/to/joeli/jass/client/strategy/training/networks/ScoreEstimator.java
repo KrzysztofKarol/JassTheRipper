@@ -2,7 +2,7 @@ package to.joeli.jass.client.strategy.training.networks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tensorflow.Tensor;
+import org.tensorflow.types.TFloat32;
 import to.joeli.jass.client.game.Game;
 import to.joeli.jass.client.game.Player;
 import to.joeli.jass.client.strategy.helpers.CardSelectionHelper;
@@ -63,10 +63,8 @@ public class ScoreEstimator extends NeuralNetwork {
 	 * @return
 	 */
 	public double predictScore(Game game) {
-		final Tensor result = (Tensor) predict(NeuralNetworkHelper.getScoreFeatures(game));
-		float[][] res = new float[1][1];
-		result.copyTo(res);
-		return (double) res[0][0];
+		final TFloat32 result = predict(NeuralNetworkHelper.getScoreFeatures(game));
+		return (double) result.getFloat(0, 0);
 	}
 
 }

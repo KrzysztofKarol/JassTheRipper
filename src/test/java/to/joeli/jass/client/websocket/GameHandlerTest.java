@@ -15,8 +15,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static com.shazam.shazamcrest.MatcherAssert.assertThat;
-import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static to.joeli.jass.client.LambdaMatcher.match;
 import static to.joeli.jass.messages.type.RemoteColor.*;
 import static to.joeli.jass.messages.type.SessionChoice.AUTOJOIN;
@@ -25,7 +24,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class GameHandlerTest {
@@ -80,7 +79,7 @@ public class GameHandlerTest {
 
 		final ChooseSession chooseSession = new GameHandler(new Player("local"), SessionType.TOURNAMENT).onRequestSessionChoice();
 
-		assertThat(chooseSession, sameBeanAs(new ChooseSession(AUTOJOIN, "Java Client Session", SessionType.TOURNAMENT)));
+		assertThat(chooseSession, equalTo(new ChooseSession(AUTOJOIN, "Java Client Session", SessionType.TOURNAMENT)));
 	}
 
 	@Test
@@ -104,7 +103,7 @@ public class GameHandlerTest {
 
 		final ChoosePlayerName choosePlayerName = new GameHandler(localPlayer, SessionType.TOURNAMENT).onRequestPlayerName();
 
-		assertThat(choosePlayerName, sameBeanAs(new ChoosePlayerName("test")));
+		assertThat(choosePlayerName, equalTo(new ChoosePlayerName("test")));
 	}
 
 	@Test
@@ -178,7 +177,7 @@ public class GameHandlerTest {
 
 		handler.onPlayedCards(Collections.singletonList(new RemoteCard(13, CLUBS)));
 
-		verify(session).makeMove(argThat(sameBeanAs(new Move(new Player("Player0"), Card.CLUB_KING))));
+		verify(session).makeMove(eq(new Move(new Player("Player0"), Card.CLUB_KING)));
 	}
 
 	@Test
@@ -212,7 +211,7 @@ public class GameHandlerTest {
 		Round expected = Round.createRound(Mode.topDown(), 0, PlayingOrder.createOrder(asList(playerOne, playerTwo, localPlayer, playerThree)));
 		expected.makeMove(new Move(playerOne, Card.CLUB_KING));
 		expected.makeMove(new Move(playerTwo, Card.DIAMOND_TEN));
-		assertThat(handler.getCurrentRound(), sameBeanAs(expected));
+		assertThat(handler.getCurrentRound(), equalTo(expected));
 	}
 
 	@Test
@@ -279,7 +278,7 @@ public class GameHandlerTest {
 
 		verify(localPlayer, times(1)).setId(null);
 		verifyNoMoreInteractions(localPlayer);
-		verifyZeroInteractions(gameSession);
+		verifyNoInteractions(gameSession);
 	}
 
 
@@ -293,7 +292,7 @@ public class GameHandlerTest {
 		gameHandler.onBroadCastTrumpf(new TrumpfChoice(Trumpf.OBEABE, null));
 
 		verify(localPlayer, times(1)).onGameStarted(gameSession);
-		verify(gameSession, times(1)).startNewGame(anyObject(), eq(true));
+		verify(gameSession, times(1)).startNewGame(any(), eq(true));
 	}
 
 }

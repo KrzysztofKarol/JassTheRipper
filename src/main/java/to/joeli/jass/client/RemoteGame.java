@@ -4,6 +4,9 @@ import to.joeli.jass.client.game.Player;
 import to.joeli.jass.client.websocket.GameHandler;
 import to.joeli.jass.client.websocket.RemoteGameSocket;
 import to.joeli.jass.messages.type.SessionType;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.transport.HttpClientTransportDynamic;
+import org.eclipse.jetty.io.ClientConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -41,9 +44,12 @@ public class RemoteGame implements Game {
 	public void start() {
 		WebSocketClient client;
 		if (targetUrl.contains("wss")) {
-			final SslContextFactory sslContextFactory = new SslContextFactory();
+			SslContextFactory.Client sslContextFactory = new SslContextFactory.Client();
 			sslContextFactory.setTrustAll(true);
-			client = new WebSocketClient(sslContextFactory);
+			ClientConnector clientConnector = new ClientConnector();
+			clientConnector.setSslContextFactory(sslContextFactory);
+			HttpClient httpClient = new HttpClient(new HttpClientTransportDynamic(clientConnector));
+			client = new WebSocketClient(httpClient);
 		} else {
 			client = new WebSocketClient();
 		}
