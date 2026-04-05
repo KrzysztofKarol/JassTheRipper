@@ -10,6 +10,9 @@ import to.joeli.jass.client.rest.responses.CardResponse;
 import to.joeli.jass.client.rest.responses.TrumpResponse;
 import to.joeli.jass.client.strategy.JassTheRipperJassStrategy;
 import to.joeli.jass.client.strategy.helpers.GameSessionBuilder;
+import to.joeli.jass.client.strategy.mcts.CardMove;
+import to.joeli.jass.client.strategy.mcts.src.Move;
+import to.joeli.jass.client.strategy.mcts.src.MoveResult;
 import to.joeli.jass.game.cards.Card;
 import to.joeli.jass.game.mode.Mode;
 
@@ -20,10 +23,8 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class AbstractJassResource {
 
@@ -87,11 +88,20 @@ public abstract class AbstractJassResource {
 		if (gameSession.getCurrentPlayer().getSeatId() != jassRequest.getCurrentPlayer())
 			throw new AssertionError("The local current player does not match the server's current player.");
 
-		final Card card = getJassStrategy().chooseCard(getAvailableCards(jassRequest), gameSession);
+		final MoveResult moveResult = getJassStrategy().chooseCardWithScores(getAvailableCards(jassRequest), gameSession);
+		final Card card = ((CardMove) moveResult.getMove()).getPlayedCard();
+
+		Map<String, Double> scores = null;
+		if (moveResult.getScores() != null) {
+			scores = new LinkedHashMap<>();
+			for (Map.Entry<Move, Double> entry : moveResult.getScores().entrySet()) {
+				scores.put(entry.getKey().toString(), entry.getValue());
+			}
+		}
 
 		return Response
 				.status(Response.Status.OK)
-				.entity(new CardResponse(card))
+				.entity(new CardResponse(card, scores))
 				.build();
 	}
 

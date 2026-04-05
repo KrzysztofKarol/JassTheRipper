@@ -19,7 +19,7 @@ import java.net.URI;
  */
 public class Server {
 
-	private static final StrengthLevel strengthLevel = StrengthLevel.HSLU_SERVER;
+	private static volatile StrengthLevel strengthLevel = StrengthLevel.HSLU_SERVER;
 
 	public static final JassTheRipperJassStrategy RANDOM_PLAYOUT_STRATEGY = new JassTheRipperJassStrategy(
 			new Config(
@@ -45,6 +45,20 @@ public class Server {
 			new Config(
 					new MCTSConfig(strengthLevel, strengthLevel), TrumpfSelectionMethod.MCTS
 			));
+
+	public static StrengthLevel getStrengthLevel() {
+		return strengthLevel;
+	}
+
+	public static void setStrengthLevel(StrengthLevel level) {
+		strengthLevel = level;
+		LIGHT_PLAYOUT_STRATEGY.getConfig().getMctsConfig().setCardStrengthLevel(level);
+		HEAVY_PLAYOUT_STRATEGY.getConfig().getMctsConfig().setCardStrengthLevel(level);
+		RUNS_100000_STRATEGY.getConfig().getMctsConfig().setCardStrengthLevel(level);
+		MCTS_TRUMPF_STRATEGY.getConfig().getMctsConfig().setCardStrengthLevel(level);
+		MCTS_TRUMPF_STRATEGY.getConfig().getMctsConfig().setTrumpfStrengthLevel(level);
+		logger.info("Strength level changed to {}", level);
+	}
 
 	// Base URI the Grizzly HTTP server will listen on
 	public static final String BASE_URI = "http://0.0.0.0/";

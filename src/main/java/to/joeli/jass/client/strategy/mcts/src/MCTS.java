@@ -44,15 +44,19 @@ public class MCTS {
 	 * @param endingTime    time when to stop running (in milliseconds)
 	 * @return
 	 */
-	public Move runForTime(Board startingBoard, int numDeterminizations, long endingTime) throws MCTSException {
+	public MoveResult runForTime(Board startingBoard, int numDeterminizations, long endingTime) throws MCTSException {
 		if (!rootParallelisationEnabled) {
 			logger.info("Only running one determinization");
-			return executeByTime(startingBoard, endingTime).getMove();
+			Node node = executeByTime(startingBoard, endingTime);
+			Move move = node.getMove();
+			Map<Move, Double> scores = new LinkedHashMap<>();
+			scores.put(move, node.getScoreForCurrentPlayer());
+			return new MoveResult(move, scores);
 		} else {
 			this.numDeterminizations = numDeterminizations;
 			logger.info("Running {} determinizations", numDeterminizations);
 			submitTimeTasks(startingBoard, endingTime);
-			return collectResultsAndGetFinalSelectedMove();
+			return collectResultsAndGetFinalSelectedMoveResult();
 		}
 	}
 
@@ -69,15 +73,19 @@ public class MCTS {
 	 * @param runs          the number of runs
 	 * @return
 	 */
-	public Move runForRuns(Board startingBoard, int numDeterminizations, long runs) throws MCTSException {
+	public MoveResult runForRuns(Board startingBoard, int numDeterminizations, long runs) throws MCTSException {
 		if (!rootParallelisationEnabled) {
 			logger.info("Only running one determinization :(");
-			return executeByRuns(startingBoard, runs).getMove();
+			Node node = executeByRuns(startingBoard, runs);
+			Move move = node.getMove();
+			Map<Move, Double> scores = new LinkedHashMap<>();
+			scores.put(move, node.getScoreForCurrentPlayer());
+			return new MoveResult(move, scores);
 		} else {
 			this.numDeterminizations = numDeterminizations;
 			logger.info("Running {} determinizations :)", numDeterminizations);
 			submitRunsTasks(startingBoard, runs);
-			return collectResultsAndGetFinalSelectedMove();
+			return collectResultsAndGetFinalSelectedMoveResult();
 		}
 	}
 
@@ -130,7 +138,7 @@ public class MCTS {
 		return finalSelection(rootNode);
 	}
 
-	private Move collectResultsAndGetFinalSelectedMove() throws MCTSException {
+	private MoveResult collectResultsAndGetFinalSelectedMoveResult() throws MCTSException {
 		try {
 			while (!checkDone(futures)) {
 				// logger.debug("Futures not ready yet. Simulation is still running. Waiting now...");
@@ -172,7 +180,7 @@ public class MCTS {
 	 * @return
 	 * @throws MCTSException
 	 */
-	private Move vote(ArrayList<Node> nodes) throws MCTSException {
+	private MoveResult vote(ArrayList<Node> nodes) throws MCTSException {
 		if (nodes.isEmpty())
 			throw new MCTSException("There are no moves to vote from. Maybe there was not enough time to explore the tree.");
 
@@ -209,11 +217,12 @@ public class MCTS {
 		});
 
 
-		return summedFinalScoresSorted.entrySet().stream() // move with highest possible reward but still high confidence is chosen -> more risk taking
-				//return numSelections.entrySet().stream() // move which has been selected the most over all the determinizations is chosen -> more risk averse
-				.findFirst() // NOTE: map needs to be sorted, otherwise use .max(Map.Entry.comparingByValue())
+		Move bestMove = summedFinalScoresSorted.entrySet().stream()
+				.findFirst()
 				.orElseThrow(() -> new IllegalStateException("There must be at least one move!"))
 				.getKey();
+
+		return new MoveResult(bestMove, summedFinalScoresSorted);
 	}
 
 	/**

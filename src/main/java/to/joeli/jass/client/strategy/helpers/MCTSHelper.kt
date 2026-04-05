@@ -11,6 +11,7 @@ import to.joeli.jass.client.strategy.mcts.JassBoard
 import to.joeli.jass.client.strategy.mcts.src.Board
 import to.joeli.jass.client.strategy.mcts.src.MCTS
 import to.joeli.jass.client.strategy.mcts.src.Move
+import to.joeli.jass.client.strategy.mcts.src.MoveResult
 import to.joeli.jass.client.strategy.training.networks.CardsEstimator
 import to.joeli.jass.client.strategy.training.networks.ScoreEstimator
 import to.joeli.jass.game.cards.Card
@@ -64,7 +65,7 @@ class MCTSHelper(private val mctsConfig: MCTSConfig) {
      * @return
      */
     @Throws(MCTSException::class)
-    fun predictMove(availableCards: Set<Card>, gameSession: GameSession, isChoosingTrumpf: Boolean, shifted: Boolean): Move? {
+    fun predictMove(availableCards: Set<Card>, gameSession: GameSession, isChoosingTrumpf: Boolean, shifted: Boolean): MoveResult? {
         val jassBoard: Board
         val scoreEstimator: ScoreEstimator?
         val cardsEstimator: CardsEstimator?

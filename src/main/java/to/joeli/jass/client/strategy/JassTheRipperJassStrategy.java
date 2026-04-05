@@ -16,6 +16,7 @@ import to.joeli.jass.client.strategy.helpers.TrumpfSelectionHelper;
 import to.joeli.jass.client.strategy.mcts.CardMove;
 import to.joeli.jass.client.strategy.mcts.TrumpfMove;
 import to.joeli.jass.client.strategy.mcts.src.Move;
+import to.joeli.jass.client.strategy.mcts.src.MoveResult;
 import to.joeli.jass.client.strategy.mcts.src.PlayoutSelectionPolicy;
 import to.joeli.jass.client.strategy.training.networks.CardsEstimator;
 import to.joeli.jass.client.strategy.training.networks.ScoreEstimator;
@@ -147,8 +148,8 @@ TODO Make new experiments with the improvements so far:
 			if (config.getTrumpfSelectionMethod() == TrumpfSelectionMethod.MCTS)
 				try {
 					if (mctsHelper == null) throw new AssertionError();
-					Move move = mctsHelper.predictMove(availableCards, session, true, shifted);
-					mode = ((TrumpfMove) move).getChosenTrumpf();
+					MoveResult moveResult = mctsHelper.predictMove(availableCards, session, true, shifted);
+					mode = ((TrumpfMove) moveResult.getMove()).getChosenTrumpf();
 				} catch (MCTSException e) {
 					logger.error("{}", e);
 					logger.error("Something went wrong. Had to choose random trumpf, damn it!");
@@ -167,6 +168,11 @@ TODO Make new experiments with the improvements so far:
 
 	@Override
 	public Card chooseCard(Set<Card> availableCards, GameSession session) {
+		MoveResult result = chooseCardWithScores(availableCards, session);
+		return ((CardMove) result.getMove()).getPlayedCard();
+	}
+
+	public MoveResult chooseCardWithScores(Set<Card> availableCards, GameSession session) {
 		final Game game = session.getCurrentGame();
 		try {
 			final long startTime = System.nanoTime();
@@ -174,6 +180,7 @@ TODO Make new experiments with the improvements so far:
 
 			final Set<Card> possibleCards = CardSelectionHelper.getCardsPossibleToPlay(availableCards, game);
 			Card card = CardSelectionHelper.getRandomCard(possibleCards, game);
+			MoveResult moveResult = null;
 
 			if (possibleCards.isEmpty())
 				logger.error("We have a serious problem! No possible card to play!");
@@ -185,8 +192,8 @@ TODO Make new experiments with the improvements so far:
 				if (config.isMctsEnabled()) {
 					try {
 						if (mctsHelper == null) throw new AssertionError();
-						Move move = mctsHelper.predictMove(availableCards, session, false, game.isShifted());
-						card = ((CardMove) move).getPlayedCard();
+						moveResult = mctsHelper.predictMove(availableCards, session, false, game.isShifted());
+						card = ((CardMove) moveResult.getMove()).getPlayedCard();
 						logger.info("Chose card based on MCTS, Hurra!");
 					} catch (MCTSException e) {
 						logger.error("{}", e);
@@ -217,11 +224,19 @@ TODO Make new experiments with the improvements so far:
 
 			logger.info("Total time for move: {}ms", (System.nanoTime() - startTime) / 1000000d);
 			logger.info("Chose card {} out of possible cards {} out of available cards {}", card, possibleCards, availableCards);
-			return card;
+
+			if (moveResult != null) {
+				return moveResult;
+			}
+			// Wrap the card in a MoveResult with no scores (non-MCTS path)
+			Move move = new CardMove(game.getCurrentPlayer(), card);
+			return new MoveResult(move, null);
 		} catch (Exception e) {
 			logger.error("{}", e);
 			logger.error("Something unexpectedly went terribly wrong! But could catch exception and chose random card now.");
-			return CardSelectionHelper.getRandomCard(availableCards, game);
+			Card fallback = CardSelectionHelper.getRandomCard(availableCards, game);
+			Move move = new CardMove(game.getCurrentPlayer(), fallback);
+			return new MoveResult(move, null);
 		}
 	}
 
