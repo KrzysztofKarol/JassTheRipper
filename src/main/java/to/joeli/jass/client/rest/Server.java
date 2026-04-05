@@ -19,7 +19,19 @@ import java.net.URI;
  */
 public class Server {
 
-	private static volatile StrengthLevel strengthLevel = StrengthLevel.HSLU_SERVER;
+	private static volatile StrengthLevel strengthLevel = resolveStrengthLevel();
+
+	private static StrengthLevel resolveStrengthLevel() {
+		String env = System.getenv("STRENGTH_LEVEL");
+		if (env != null) {
+			try {
+				return StrengthLevel.valueOf(env);
+			} catch (IllegalArgumentException e) {
+				LoggerFactory.getLogger(Server.class).warn("Unknown STRENGTH_LEVEL '{}', falling back to HSLU_SERVER", env);
+			}
+		}
+		return StrengthLevel.HSLU_SERVER;
+	}
 
 	public static final JassTheRipperJassStrategy RANDOM_PLAYOUT_STRATEGY = new JassTheRipperJassStrategy(
 			new Config(
