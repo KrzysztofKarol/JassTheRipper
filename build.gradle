@@ -120,3 +120,5 @@ compileTestKotlin {
         jvmTarget = JvmTarget.JVM_21
     }
 }
+
+compileTestJava.options.compilerArgs += ['-Xlint:deprecation', '-Xlint:unchecked']

@@ -1,6 +1,6 @@
 package to.joeli.jass.client.strategy.benchmarks;
 
-import com.google.common.base.Charsets;
+import java.nio.charset.StandardCharsets;
 import com.google.common.io.Files;
 import to.joeli.jass.client.RemoteGame;
 import to.joeli.jass.client.game.Player;
@@ -54,7 +54,7 @@ public class BenchmarkRunner {
 
 		String experimentResult = null;
 		try {
-			experimentResult = Files.asCharSource(lastModifiedFile, Charsets.UTF_8).read();
+			experimentResult = Files.asCharSource(lastModifiedFile, StandardCharsets.UTF_8).read();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

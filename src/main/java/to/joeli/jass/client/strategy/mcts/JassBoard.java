@@ -131,6 +131,7 @@ public class JassBoard implements Board {
 	 * @return
 	 * @deprecated Now this is solved with the isChoosingTrumpf method
 	 */
+	@Deprecated
 	private boolean cardsAreNotDistributedYet() {
 		for (Player player : this.game.getPlayers()) {
 			if (player.getCards().isEmpty())
