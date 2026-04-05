@@ -28,7 +28,7 @@ enum class StrengthLevel constructor(val numDeterminizationsFactor: Int, val max
     SUPERMAN(8, 5000, 1000),
     IRONMAN(9, 10000, 2000),
     JASS_TEPPICH(10, 5000, 2000),
-    HETZNER_CX23(2, 5000, 500),
+    HETZNER_CX23(2, 1000, 500),
     HSLU_SERVER(15, 9900, 2000),
     TRUMPF(15, 10000, 2000),
     CARD_VALUATION(25, 30000, 2000),
