@@ -105,7 +105,8 @@ public class JassBoard implements Board {
 			try {
 				Thread.sleep(1); // to make comparison fairer
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.warn("Thread interrupted during cheating sleep", e);
+				Thread.currentThread().interrupt();
 			}
 	}
 
@@ -119,7 +120,8 @@ public class JassBoard implements Board {
 			try {
 				Thread.sleep(1); // to make comparison fairer
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.warn("Thread interrupted during cheating sleep", e);
+				Thread.currentThread().interrupt();
 			}
 	}
 

@@ -57,14 +57,14 @@ JassTheRipper bots:
 - http://jasstheripper.joeli.to/mcts-trumpf
 - http://jasstheripper.joeli.to/random-playout-dnn-trumpf
 
-HSLU opponents:
-- http://10.180.39.12:5001/randomsimple
-- http://10.180.39.12:5001/soismcts-100000-trump
-- http://10.180.39.12:5001/dnn-max-policy-trump
-- http://10.180.39.12:5001/dnn-max-value-trump
-- http://10.180.39.12:5001/prob-ismcts-trump
-- http://10.180.39.12:5001/det-mcts-random-random
-- http://10.180.39.12:5001/det-mcts-prob-random
+HSLU opponents (configure the actual host via environment variable or config):
+- http://<HSLU_HOST>:5001/randomsimple
+- http://<HSLU_HOST>:5001/soismcts-100000-trump
+- http://<HSLU_HOST>:5001/dnn-max-policy-trump
+- http://<HSLU_HOST>:5001/dnn-max-value-trump
+- http://<HSLU_HOST>:5001/prob-ismcts-trump
+- http://<HSLU_HOST>:5001/det-mcts-random-random
+- http://<HSLU_HOST>:5001/det-mcts-prob-random
 
 
 Tournament Server available on: https://jass-server.abiz.ch/

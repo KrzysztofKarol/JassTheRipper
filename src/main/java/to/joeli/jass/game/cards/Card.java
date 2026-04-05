@@ -58,8 +58,12 @@ public enum Card {
 	 * @return
 	 */
 	public static Card getCard(String cardString) {
+		if (cardString == null || cardString.length() < 2)
+			throw new IllegalArgumentException("Invalid card string: " + cardString);
 		Color color = Color.getColor(cardString.substring(0, 1));
 		CardValue value = CardValue.getCardValue(cardString.substring(1));
+		if (color == null || value == null)
+			throw new IllegalArgumentException("Unknown card string: " + cardString);
 		return getCard(color, value);
 	}
 

@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractJassResource {
 
-	public static final String DNN_MAX_POLICY_PATH = "http://54.154.231.243:5001/dnn-max-policy-trump";
+	public static final String DNN_MAX_POLICY_PATH = Optional.ofNullable(System.getenv("DNN_MAX_POLICY_URL")).orElse("");
 
 	public static final Logger logger = LoggerFactory.getLogger(AbstractJassResource.class);
 
@@ -60,7 +60,7 @@ public abstract class AbstractJassResource {
 			seatId = (seatId + 2) % 4;
 
 		if (seatId != jassRequest.getCurrentPlayer())
-			throw new AssertionError("The local current player does not match the server's current player.");
+			throw new BadRequestException("The local current player does not match the server's current player.");
 
 		final Mode trumpf = getJassStrategy().chooseTrumpf(getAvailableCards(jassRequest), gameSession, shifted);
 
@@ -86,7 +86,7 @@ public abstract class AbstractJassResource {
 				.createGameSession();
 
 		if (gameSession.getCurrentPlayer().getSeatId() != jassRequest.getCurrentPlayer())
-			throw new AssertionError("The local current player does not match the server's current player.");
+			throw new BadRequestException("The local current player does not match the server's current player.");
 
 		final MoveResult moveResult = getJassStrategy().chooseCardWithScores(getAvailableCards(jassRequest), gameSession);
 		final Card card = ((CardMove) moveResult.getMove()).getPlayedCard();
@@ -109,8 +109,7 @@ public abstract class AbstractJassResource {
 	@Path("game_info")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response gameInfo(JassRequest jassRequest) {
-		logger.info("{}", jassRequest);
-
+		logger.debug("game_info request received");
 		return Response
 				.status(Response.Status.OK)
 				.build();
@@ -124,11 +123,15 @@ public abstract class AbstractJassResource {
 	}
 
 	protected Response forwardRequest(JassRequest jassRequest, String path) {
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(DNN_MAX_POLICY_PATH);
-
-		return target.path(path)
-				.request(MediaType.APPLICATION_JSON)
-				.post(Entity.json(jassRequest));
+		if (DNN_MAX_POLICY_PATH.isEmpty()) {
+			logger.error("DNN_MAX_POLICY_URL environment variable not set; cannot forward request");
+			return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+		}
+		try (Client client = ClientBuilder.newClient()) {
+			WebTarget target = client.target(DNN_MAX_POLICY_PATH);
+			return target.path(path)
+					.request(MediaType.APPLICATION_JSON)
+					.post(Entity.json(jassRequest));
+		}
 	}
 }

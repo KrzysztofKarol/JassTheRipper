@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory
 
 import java.io.File
 import java.io.IOException
-import java.lang.reflect.Field
 
 object ShellScriptRunner {
 
@@ -34,7 +33,7 @@ object ShellScriptRunner {
             try {
                 processes.add(builder.start())
             } catch (e: IOException) {
-                e.printStackTrace()
+                logger.error("Failed to start shell process: $command", e)
             }
         }
         thread.start()
@@ -52,15 +51,14 @@ object ShellScriptRunner {
 
         try {
             val process = builder.start()
-
             val exitCode = process.waitFor()
-            println("\nShell process '$command' finished with exit code: $exitCode")
+            logger.info("Shell process '{}' finished with exit code: {}", command, exitCode)
             return exitCode == 0
-
         } catch (e: IOException) {
-            e.printStackTrace()
+            logger.error("Failed to run shell process: $command", e)
         } catch (e: InterruptedException) {
-            e.printStackTrace()
+            logger.warn("Shell process interrupted: $command", e)
+            Thread.currentThread().interrupt()
         }
 
         return false
@@ -100,28 +98,15 @@ object ShellScriptRunner {
     }
 
     /**
-     * Retrieves the pid of a running process with reflection.
+     * Retrieves the pid of a running process using the ProcessHandle API.
      *
      * @param process
      * @return
      */
     @Synchronized
     private fun getPidOfProcess(process: Process): Long {
-        var pid: Long = -1
-
-        try {
-            if (process.javaClass.name == "java.lang.UNIXProcess") {
-                val f = process.javaClass.getDeclaredField("pid")
-                f.isAccessible = true
-                pid = f.getLong(process)
-                f.isAccessible = false
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            pid = -1
-        }
-
-        println("PID of $process is $pid")
+        val pid = process.pid()
+        logger.debug("PID of process is {}", pid)
         return pid
     }
 }

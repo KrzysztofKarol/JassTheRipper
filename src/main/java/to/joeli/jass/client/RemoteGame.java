@@ -45,7 +45,6 @@ public class RemoteGame implements Game {
 		WebSocketClient client;
 		if (targetUrl.contains("wss")) {
 			SslContextFactory.Client sslContextFactory = new SslContextFactory.Client();
-			sslContextFactory.setTrustAll(true);
 			ClientConnector clientConnector = new ClientConnector();
 			clientConnector.setSslContextFactory(sslContextFactory);
 			HttpClient httpClient = new HttpClient(new HttpClientTransportDynamic(clientConnector));
@@ -68,8 +67,7 @@ public class RemoteGame implements Game {
 			try {
 				client.stop();
 			} catch (Exception e) {
-				e.printStackTrace();
-				logger.error("Could not stop the websocket client.");
+				logger.error("Could not stop the websocket client.", e);
 			}
 		}
 	}
