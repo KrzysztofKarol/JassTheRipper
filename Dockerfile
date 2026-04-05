@@ -14,4 +14,4 @@ WORKDIR /app
 ENV JAVA_OPTS="-Xmx2g -Xms512m -XX:+UseZGC -XX:MaxGCPauseMillis=10"
 ENV STRENGTH_LEVEL=HETZNER_CX23
 
-CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+CMD ["sh", "-c", "java $JAVA_OPTS -cp app.jar to.joeli.jass.client.rest.Server"]
